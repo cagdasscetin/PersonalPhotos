@@ -8,13 +8,13 @@ using PersonalPhotos.Models;
 
 namespace PersonalPhotos.Test;
 
-public class LoginsTest
+public class LoginsTests
 {
     private readonly LoginsController _controller;
     private readonly Mock<ILogins> _logins;
     private readonly Mock<IHttpContextAccessor> _accessor;
 
-    public LoginsTest()
+    public LoginsTests()
     {
         _logins = new Mock<ILogins>();
 
@@ -23,7 +23,7 @@ public class LoginsTest
         
         _accessor = new Mock<IHttpContextAccessor>();
         _accessor.Setup(x => x.HttpContext).Returns(httpContext);
-            
+        
         _controller = new LoginsController(_logins.Object, _accessor.Object);
     }
 
