@@ -1,4 +1,5 @@
 using Core.Interfaces;
+using Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -16,7 +17,13 @@ public class LoginsTest
     public LoginsTest()
     {
         _logins = new Mock<ILogins>();
+
+        var session = Mock.Of<ISession>();
+        var httpContext = Mock.Of<HttpContext>(x => x.Session == session);
+        
         _accessor = new Mock<IHttpContextAccessor>();
+        _accessor.Setup(x => x.HttpContext).Returns(httpContext);
+            
         _controller = new LoginsController(_logins.Object, _accessor.Object);
     }
 
@@ -39,5 +46,19 @@ public class LoginsTest
         var result = await _controller.Login(Mock.Of<LoginViewModel>()) as ViewResult;
         
         Assert.Equal("Login", result.ViewName, ignoreCase: true);
+    }
+
+    [Fact]
+    public async Task Login_GivenCorrectPassword_RedirectToDisplayAction()
+    {
+        const string password = "test1234";
+        var modelView = Mock.Of<LoginViewModel>(x => x.Email == "test@gmail.com" && x.Password == password); // entered user info
+        var model = Mock.Of<User>(x => x.Password == password); // compared user info
+
+        _logins.Setup(x => x.GetUser(It.IsAny<string>())).ReturnsAsync(model);
+
+        var result = await _controller.Login(modelView);
+        
+        Assert.IsType<RedirectToActionResult>(result);
     }
 }
